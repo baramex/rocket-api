@@ -3,7 +3,7 @@ const Postgres = require('../modules/postgres');
 const router = require('express').Router();
 
 router.get("/payload", (req, res) => {
-    if (req.query.count && (typeof req.query.count !== 'number' || req.query.count > 100 || req.query.count < 1)) {
+    if (req.query.count && (isNaN(parseInt(req.query.count)) || parseInt(req.query.count) > 100 || parseInt(req.query.count) < 1)) {
         return res.status(400).json({ error: "Count parameter exceeds maximum limit of 100 or is invalid" });
     }
     const count = parseInt(req.query.count) || 5;
