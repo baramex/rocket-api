@@ -21,7 +21,7 @@ class Postgres {
         pool.query("CREATE TABLE IF NOT EXISTS status (id SERIAL PRIMARY KEY NOT NULL, status SMALLINT, time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
         pool.query("CREATE TABLE IF NOT EXISTS locations (id SERIAL PRIMARY KEY NOT NULL, longitude DOUBLE PRECISION, latitude DOUBLE PRECISION, time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
         pool.query("CREATE TABLE IF NOT EXISTS motors (id SERIAL PRIMARY KEY NOT NULL, motor_right INTEGER, motor_left INTEGER, time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
-        pool.query("CREATE TABLE IF NOT EXISTS altitudes (id SERIAL PRIMARY KEY NOT NULL, altitude INTEGER, time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+        pool.query("CREATE TABLE IF NOT EXISTS altitudes (id SERIAL PRIMARY KEY NOT NULL, altitude DOUBLE PRECISION, time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
     }
 
     static pushStatus(status) {
@@ -43,15 +43,15 @@ class Postgres {
     static getPayloadData(count = 5) {
         return Promise.all([
             pool.query("SELECT * FROM status ORDER BY time DESC LIMIT 1"),
-            pool.query("SELECT * FROM locations ORDER BY time DESC LIMIT $1", [count]),
+            pool.query("SELECT *, EXTRACT(EPOCH FROM time) * 1000 as timestamp FROM locations ORDER BY time DESC LIMIT $1", [count]),
             pool.query("SELECT * FROM motors ORDER BY time DESC LIMIT 1"),
-            pool.query("SELECT * FROM altitudes ORDER BY time DESC LIMIT $1", [count])
+            pool.query("SELECT *, EXTRACT(EPOCH FROM time) * 1000 as timestamp FROM altitudes ORDER BY time DESC LIMIT $1", [count])
         ]).then(([statusRes, locationRes, motorsRes, altitudeRes]) => {
             return {
                 status: statusRes.rows[0],
-                locations: locationRes.rows,
+                locations: locationRes.rows.map(row => ({ id: row.id, longitude: row.longitude, latitude: row.latitude, timestamp: parseInt(row.timestamp) })),
                 motors: motorsRes.rows[0],
-                altitudes: altitudeRes.rows
+                altitudes: altitudeRes.rows.map(row => ({ id: row.id, altitude: row.altitude, timestamp: parseInt(row.timestamp) }))
             };
         });
     }
