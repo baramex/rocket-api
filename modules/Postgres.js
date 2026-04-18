@@ -12,12 +12,16 @@ pool.on("error", (err) => {
     console.error("[DATABASE] Erreur de connexion", err);
 });
 
+pool.on("connect", () => {
+    console.log("[DATABASE] Connecté à la base de données PostgreSQL");
+});
+
 class Postgres {
     static init() {
-        pool.query("CREATE TABLE IF NOT EXISTS status (id SERIAL PRIMARY KEY NOT NULL, status SMALL INT, time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+        pool.query("CREATE TABLE IF NOT EXISTS status (id SERIAL PRIMARY KEY NOT NULL, status SMALLINT, time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
         pool.query("CREATE TABLE IF NOT EXISTS locations (id SERIAL PRIMARY KEY NOT NULL, longitude DOUBLE PRECISION, latitude DOUBLE PRECISION, time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
-        pool.query("CREATE TABLE IF NOT EXISTS motors (id SERIAL PRIMARY KEY NOT NULL, motor_right INT, motor_left INT, time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
-        pool.query("CREATE TABLE IF NOT EXISTS altitudes (id SERIAL PRIMARY KEY NOT NULL, altitude INT, time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+        pool.query("CREATE TABLE IF NOT EXISTS motors (id SERIAL PRIMARY KEY NOT NULL, motor_right INTEGER, motor_left INTEGER, time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+        pool.query("CREATE TABLE IF NOT EXISTS altitudes (id SERIAL PRIMARY KEY NOT NULL, altitude INTEGER, time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
     }
 
     static pushStatus(status) {

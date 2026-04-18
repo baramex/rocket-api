@@ -14,10 +14,12 @@ Postgres.init();
 
 app.use(cors({ origin: ['https://rocket.baramex.me', 'http://localhost:3000'], credentials: true }));
 
-app.post((req, res, next) => {
-    const key = req.headers.authorization?.split(" ")[1];
-    if (key !== process.env.POST_KEY) {
-        return res.status(401).json({ error: "Unauthorized" });
+app.use((req, res, next) => {
+    if (req.method === "POST") {
+        const key = req.headers.authorization?.split(" ")[1];
+        if (key !== process.env.POST_KEY) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
     }
     next();
 });
